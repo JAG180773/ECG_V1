@@ -1,0 +1,8 @@
+streamlit>=1.34
+numpy
+pandas
+wfdb
+plotly
+neurokit2
+torch
+scipy
