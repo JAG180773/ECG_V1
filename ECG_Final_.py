@@ -84,6 +84,29 @@ def load_local() -> Tuple[Optional[wfdb.Record], Optional[str]]:
 # ------------------------------------------------------------------
 # 2. Procesamiento ECG
 # ------------------------------------------------------------------
+# -------------------------------------------------------------
+# util ─ dibuja cuadrícula ECG a 25 mm/s y 10 mm/mV
+# -------------------------------------------------------------
+def add_ecg_grid(fig: go.Figure,
+                 t0: float, t1: float,
+                 y_lo: float, y_hi: float) -> None:
+    """Añade líneas tipo papel milimetrado al objeto Plotly."""
+    # verticales: cada 0.04 s (1 mm)  y 0.20 s (5 mm)
+    for x in np.arange(t0, t1, 0.04):
+        fig.add_shape(type="line", x0=x, x1=x, y0=y_lo, y1=y_hi,
+                      line=dict(color="LightPink", width=0.5), layer="below")
+    for x in np.arange(t0, t1, 0.20):
+        fig.add_shape(type="line", x0=x, x1=x, y0=y_lo, y1=y_hi,
+                      line=dict(color="LightPink", width=1.4), layer="below")
+    # horizontales: cada 0.1 mV (1 mm)  y 0.5 mV (5 mm)
+    y0 = np.floor(y_lo/0.1)*0.1
+    y1 = np.ceil (y_hi/0.1)*0.1
+    for y in np.arange(y0, y1, 0.1):
+        fig.add_shape(type="line", x0=t0, x1=t1, y0=y, y1=y,
+                      line=dict(color="LightPink", width=0.5), layer="below")
+    for y in np.arange(y0, y1, 0.5):
+        fig.add_shape(type="line", x0=t0, x1=t1, y0=y, y1=y,
+                      line=dict(color="LightPink", width=1.4), layer="below")
 
 def best_lead(rec):
     return rec.sig_name[np.argmax([np.std(rec.p_signal[:, i]) for i in range(rec.n_sig)])]
@@ -245,14 +268,39 @@ def main() -> None:
     # ------- TAB ECG -------
     
     with tab_ecg:
+        sig_mV = sz * 0.1
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=tz, y=sz * 0.1, mode="lines", name=lead))
+        #fig.add_trace(go.Scatter(x=tz, y=sz * 0.1, mode="lines", name=lead))
+        fig.add_trace(go.Scatter(x=tz, y=sig_mV, mode="lines", name=lead))
         if len(r_idx):
-            fig.add_trace(go.Scatter(x=tz[r_idx], y=sz[r_idx] * 0.1, mode="markers",
-                                     marker=dict(color="red", size=6), name="R"))
+        #    fig.add_trace(go.Scatter(x=tz[r_idx], y=sz[r_idx] * 0.1, mode="markers",
+        #                             marker=dict(color="red", size=6), name="R"))
+            fig.add_trace(go.Scatter(x=tz[r_idx], y=sig_mV[r_idx],
+                         mode="markers",
+                         marker=dict(color="red", size=6), name="R"))
         fig.update_layout(height=470, plot_bgcolor="white", xaxis_title="Tiempo (s)", yaxis_title="Amplitud (mV)")
+        #st.plotly_chart(fig, use_container_width=True)
+        # límites verticales con un pequeño margen
+        y_lo, y_hi = sig_mV.min() - 0.2, sig_mV.max() + 0.2
+        # papel milimetrado
+        add_ecg_grid(fig, tz[0], tz[-1], y_lo, y_hi)
+        # ----- cuadrícula papel milimetrado -----
+       
+        #y_min, y_max = sig_mV.min() - 0.2, sig_mV.max() + 0.2
+        #add_ecg_grid(fig, tz[0], tz[-1], y_min, y_max)
+    
+        #fig.update_layout(height=470,
+        #                  plot_bgcolor="white",
+        #                  xaxis_title="Tiempo (s)",
+        #                  yaxis_title="Amplitud (mV)")
+        # 3) layout
+        fig.update_layout(height=470,
+                          plot_bgcolor="white",
+                          xaxis_title="Tiempo (s)",
+                          yaxis_title="Amplitud (mV)",
+                          yaxis=dict(range=[y_lo, y_hi]))
+        
         st.plotly_chart(fig, use_container_width=True)
-
         # ----- HR metrics & state
         hr_mean, hr_med, hr_state = compute_hr(r_idx, tz)
         if hr_mean is None:
