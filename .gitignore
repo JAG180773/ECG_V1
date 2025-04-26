@@ -1,3 +1,6 @@
+# --- Datos crudos de ECG --------------
+ECG_DB/          # carpeta completa no se rastrea
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -173,5 +176,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# --- Datos crudos de ECG --------------
-ECG_DB/          # carpeta completa no se rastrea
+
