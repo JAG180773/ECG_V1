@@ -11,6 +11,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"   # opcional
 )
+st.title("🫀 Visor ECG con IA")
 st.set_page_config(layout="wide", page_title="ECG Analyzer", page_icon="🫀")
 
 from typing import Optional, List, Tuple, Dict
@@ -224,7 +225,7 @@ def launch_training(model: ECGClassifierMLP, current_rec: wfdb.Record):
 
 def main() -> None:
     mlp = load_mlp()
-    st.title("🫀 Visor ECG con IA")
+
     st.sidebar.title("Fuente de datos")
     mode = st.sidebar.radio("Origen", ["PhysioNet", "Local"])
     rec, rec_name, rec_path = (load_physionet() if mode == "PhysioNet" else load_local())
