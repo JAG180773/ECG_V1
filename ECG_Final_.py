@@ -5,6 +5,12 @@ Basado en Stage 3 pero con UI de pestañas y sin generación de PDF.
 """
 
 import streamlit as st
+st.set_page_config(
+    page_title="Visor ECG IA",
+    page_icon="🫀",
+    layout="wide",
+    initial_sidebar_state="collapsed"   # opcional
+)
 st.set_page_config(layout="wide", page_title="ECG Analyzer", page_icon="🫀")
 
 from typing import Optional, List, Tuple, Dict
@@ -218,7 +224,7 @@ def launch_training(model: ECGClassifierMLP, current_rec: wfdb.Record):
 
 def main() -> None:
     mlp = load_mlp()
-
+    st.title("🫀 Visor ECG con IA")
     st.sidebar.title("Fuente de datos")
     mode = st.sidebar.radio("Origen", ["PhysioNet", "Local"])
     rec, rec_name, rec_path = (load_physionet() if mode == "PhysioNet" else load_local())
